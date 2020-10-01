@@ -33,7 +33,7 @@ class _Example01State extends State<Example01> {
       ObjPath("star", "lib/assets/objects", "test.obj")
     ], [
       InstanceInfo("star",
-          position: vec.Vector3(2, -3, 3), scale: vec.Vector3(1, 1, 1)),
+          position: vec.Vector3(2, -3, 3), scale: vec.Vector3(2, 2, 2)),
     ]);
     controller = RandomVertexController(
         context,

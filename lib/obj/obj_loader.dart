@@ -20,16 +20,19 @@ class OBJLoaderMaterial {
 
 class OBJLoaderFace {
   List<vec32.Vector3> _positions;
+  List<vec32.Vector3> _colors;
   List<vec32.Vector3> _normals;
   List<vec32.Vector2> _uvs;
   String materialName;
 
   OBJLoaderFace()
       : _positions = List<vec32.Vector3>(3),
+        _colors = List<vec32.Vector3>(3),
         _normals = List<vec32.Vector3>(3),
         _uvs = List<vec32.Vector2>(3);
 
   List<vec32.Vector3> get positions => _positions;
+  List<vec32.Vector3> get colors => _colors;
   List<vec32.Vector3> get normals => _normals;
   List<vec32.Vector2> get uvs => _uvs;
 }
@@ -64,6 +67,7 @@ class OBJLoader {
 
   void _parseOBJFile() {
     List<vec32.Vector3> positions = <vec32.Vector3>[];
+    List<vec32.Vector3> colors = <vec32.Vector3>[];
     List<vec32.Vector3> normals = <vec32.Vector3>[];
     List<vec32.Vector2> uvs = <vec32.Vector2>[];
     String currentMaterialName;
@@ -74,8 +78,13 @@ class OBJLoader {
       if (line.startsWith('v ')) {
         final args = line.split(' ');
         // args[0] = 'v' args[1..3] = position coords
+        // optional: args[4..6] = vertex colour values
         positions.add(vec32.Vector3(double.parse(args[1]),
             double.parse(args[2]), double.parse(args[3])));
+        if(args.length >= 7){
+          colors.add(vec32.Vector3(double.parse(args[4]),
+              double.parse(args[5]), double.parse(args[6])));
+        }
       } else if (line.startsWith('vn ')) {
         final args = line.split(' ');
         // args[0] = 'vn' args[1..3] = normal coords
@@ -100,6 +109,15 @@ class OBJLoader {
         face.positions[0] = positions[int.parse(v0[0]) - 1];
         face.positions[1] = positions[int.parse(v1[0]) - 1];
         face.positions[2] = positions[int.parse(v2[0]) - 1];
+
+        if(colors.isNotEmpty) {
+          face.colors[0] = colors[int.parse(v0[0]) - 1];
+          face.colors[1] = colors[int.parse(v1[0]) - 1];
+          face.colors[2] = colors[int.parse(v2[0]) - 1];
+        } else{
+          face.colors[0] = face.colors[1] = face.colors[2] = null;
+          // set to null so we can easily check this
+        }
 
         if (normals.isNotEmpty) {
           face.normals[0] = normals[int.parse(v0[2]) - 1];
@@ -228,9 +246,25 @@ class OBJLoader {
       uvs[i * 6 + 4] = _faces[i].uvs[2].x;
       uvs[i * 6 + 5] = _faces[i].uvs[2].y;
 
-      colors[i * 3 + 0] = _materials[_faces[i].materialName].diffuseColor.value;
-      colors[i * 3 + 1] = _materials[_faces[i].materialName].diffuseColor.value;
-      colors[i * 3 + 2] = _materials[_faces[i].materialName].diffuseColor.value;
+      if(_faces[i].colors[0] != null) {
+        // we are using vertex colours in the obj file
+        for (int j = 0; j < 3; j++) {
+          int r = (_faces[i].colors[j].x * 255).round();
+          int g = (_faces[i].colors[j].y * 255).round();
+          int b = (_faces[i].colors[j].z * 255).round();
+          Color c = Color.fromARGB(255, r, g, b);
+          colors[i * 3 + j] = c.value;
+        }
+      }
+      else {
+        // we are getting colours from a material
+        colors[i * 3 + 0] =
+            _materials[_faces[i].materialName].diffuseColor.value;
+        colors[i * 3 + 1] =
+            _materials[_faces[i].materialName].diffuseColor.value;
+        colors[i * 3 + 2] =
+            _materials[_faces[i].materialName].diffuseColor.value;
+      }
 
       indices[i * 3 + 0] = i * 3 + 0;
       indices[i * 3 + 1] = i * 3 + 1;

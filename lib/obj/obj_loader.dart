@@ -252,6 +252,7 @@ class OBJLoader {
           int r = (_faces[i].colors[j].x * 255).round();
           int g = (_faces[i].colors[j].y * 255).round();
           int b = (_faces[i].colors[j].z * 255).round();
+          //print("r: $r, g: $g, b: $b");
           Color c = Color.fromARGB(255, r, g, b);
           colors[i * 3 + j] = c.value;
         }

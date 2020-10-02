@@ -6,6 +6,7 @@ import 'package:vertex/vertex.dart';
 import 'package:vertex/widgets/listenable_builder.dart';
 
 import 'src/example_02/example_02.dart';
+import 'src/example_03/example_03.dart';
 
 
 
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Example01(),
+      home: Example03(),
       //home: Example02(),
     );
   }
